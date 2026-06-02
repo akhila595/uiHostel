@@ -1,8 +1,17 @@
-import { FlatList, StyleSheet, Text, View } from "react-native";
-
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useFocusEffect } from "expo-router";
+import { useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+
+import { router } from "expo-router";
 
 import { getRooms } from "../api/roomApi";
 
@@ -19,13 +28,23 @@ export default function RoomsScreen() {
     }
   };
 
-  useEffect(() => {
-    loadRooms();
-  }, []);
-
+  useFocusEffect(
+    useCallback(() => {
+      loadRooms();
+    }, []),
+  );
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Rooms</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Rooms</Text>
+
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => router.push("/add-room")}
+        >
+          <Text style={styles.buttonText}>Add Room</Text>
+        </TouchableOpacity>
+      </View>
 
       <FlatList
         data={rooms}
@@ -82,5 +101,22 @@ const styles = StyleSheet.create({
   text: {
     color: "#6b7280",
     marginTop: 4,
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+
+  addButton: {
+    backgroundColor: "#2563eb",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });

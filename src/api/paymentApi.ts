@@ -11,3 +11,9 @@ export const getPaymentHistory = async (studentId: number) => {
 
   return response.data;
 };
+
+export const getPaymentsThisMonth = async () => {
+  const response = await API.get("/api/v1/payments/this-month");
+
+  return response.data;
+};

@@ -1,3 +1,5 @@
+import { useFocusEffect } from "expo-router";
+import { useCallback } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -5,10 +7,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { router } from "expo-router";
 
@@ -61,9 +62,11 @@ export default function DashboardScreen() {
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, []),
+  );
 
   const summaryCards = [
     {
@@ -87,6 +90,17 @@ export default function DashboardScreen() {
     {
       title: "Available",
       value: dashboard?.availableBeds || 0,
+      color: "#16a34a",
+    },
+    {
+      title: "Pending ₹",
+      value: dashboard?.pendingAmount || 0,
+      color: "#dc2626",
+    },
+
+    {
+      title: "Collected ₹",
+      value: dashboard?.collectedThisMonth || 0,
       color: "#16a34a",
     },
   ];
@@ -120,7 +134,6 @@ export default function DashboardScreen() {
               ]}
             >
               <Text style={styles.summaryTitle}>{item.title}</Text>
-
               <Text
                 style={[
                   styles.summaryValue,
@@ -129,7 +142,7 @@ export default function DashboardScreen() {
                   },
                 ]}
               >
-                {item.value}
+                {item.title.includes("₹") ? `₹${item.value}` : item.value}
               </Text>
             </View>
           ))}
@@ -156,25 +169,30 @@ export default function DashboardScreen() {
 
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => router.push("/add-student")}
-          >
-            <Text style={styles.actionText}>Add Student</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
             onPress={() => router.push("/payments")}
           >
             <Text style={styles.actionText}>Payments</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => router.push("/add-room")}
+            onPress={() => router.push("/paid-students")}
           >
-            <Text style={styles.actionText}>Add Room</Text>
+            <Text style={styles.actionText}>Paid Students</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => router.push("/overdue-students")}
+          >
+            <Text style={styles.actionText}>Overdue Students</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => router.push("/room-occupancy")}
+          >
+            <Text style={styles.actionText}>Room Occupancy</Text>
           </TouchableOpacity>
         </View>
-
         {/* DUE TODAY */}
 
         <Text style={styles.sectionTitle}>Fee Due Today</Text>
@@ -192,39 +210,6 @@ export default function DashboardScreen() {
             </View>
           ))
         )}
-
-        {/* OVERDUE */}
-
-        <Text style={styles.sectionTitle}>Overdue Students</Text>
-
-        {overdue.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyText}>No overdue students</Text>
-          </View>
-        ) : (
-          overdue.slice(0, 5).map((student, index) => (
-            <View key={index} style={styles.overdueCard}>
-              <Text style={styles.studentName}>{student.fullName}</Text>
-
-              <Text style={styles.roomText}>Room {student.roomNumber}</Text>
-            </View>
-          ))
-        )}
-
-        {/* ROOM OCCUPANCY */}
-
-        <Text style={styles.sectionTitle}>Room Occupancy</Text>
-
-        {rooms.slice(0, 5).map((room, index) => (
-          <View key={index} style={styles.listCard}>
-            <Text style={styles.studentName}>Room {room.roomNumber}</Text>
-
-            <Text style={styles.roomText}>
-              {room.occupiedBeds}/{room.totalBeds} Occupied
-            </Text>
-          </View>
-        ))}
-
         <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
@@ -253,7 +238,7 @@ const styles = StyleSheet.create({
   },
 
   hostelName: {
-    fontSize: 30,
+    fontSize: 26,
     fontWeight: "bold",
     color: "#111827",
     marginTop: 4,
@@ -272,35 +257,36 @@ const styles = StyleSheet.create({
   },
 
   summaryCard: {
-    width: "48%",
+    width: "31%",
     backgroundColor: "#fff",
-    borderRadius: 18,
-    padding: 18,
-    marginBottom: 15,
-    borderLeftWidth: 6,
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 12,
+    borderLeftWidth: 5,
 
     shadowColor: "#000",
     shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowRadius: 8,
+    elevation: 3,
   },
 
   summaryTitle: {
     color: "#6b7280",
-    fontSize: 14,
+    fontSize: 13,
+    fontWeight: "500",
   },
 
   summaryValue: {
-    fontSize: 32,
+    fontSize: 18,
     fontWeight: "bold",
-    marginTop: 10,
+    marginTop: 6,
   },
 
   sectionTitle: {
     fontSize: 22,
     fontWeight: "bold",
     color: "#111827",
-    marginTop: 18,
+    marginTop: 22,
     marginBottom: 12,
   },
 
@@ -313,21 +299,21 @@ const styles = StyleSheet.create({
   actionButton: {
     width: "48%",
     backgroundColor: "#2563eb",
-    paddingVertical: 18,
-    borderRadius: 16,
+    paddingVertical: 16,
+    borderRadius: 14,
     marginBottom: 12,
 
     shadowColor: "#2563eb",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3,
   },
 
   actionText: {
     color: "#fff",
     textAlign: "center",
     fontWeight: "bold",
-    fontSize: 15,
+    fontSize: 14,
   },
 
   listCard: {

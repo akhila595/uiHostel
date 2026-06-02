@@ -1,8 +1,16 @@
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { useCallback, useState } from "react";
 
+import { useFocusEffect } from "expo-router";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useEffect, useState } from "react";
+import { router } from "expo-router";
 
 import { getStudents } from "../api/studentApi";
 
@@ -19,14 +27,24 @@ export default function StudentsScreen() {
     }
   };
 
-  useEffect(() => {
-    loadStudents();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadStudents();
+    }, []),
+  );
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Students</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Students</Text>
 
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => router.push("/add-student")}
+        >
+          <Text style={styles.buttonText}>Add Student</Text>
+        </TouchableOpacity>
+      </View>
       <FlatList
         data={students}
         keyExtractor={(item) => item.id.toString()}
@@ -40,7 +58,32 @@ export default function StudentsScreen() {
 
             <Text style={styles.text}>Fee: ₹{item.feeAmount}</Text>
 
-            <Text style={styles.status}>{item.status}</Text>
+            <Text
+              style={[
+                styles.status,
+                {
+                  color: item.status === "ACTIVE" ? "#16a34a" : "#dc2626",
+                },
+              ]}
+            >
+              {item.status}
+            </Text>
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() =>
+                  router.push({
+                    pathname: "/edit-student",
+                    params: {
+                      id: item.id,
+                    },
+                  })
+                }
+              >
+                <Text style={styles.buttonText}>✏️ Edit</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       />
@@ -85,7 +128,37 @@ const styles = StyleSheet.create({
 
   status: {
     marginTop: 10,
-    color: "#2563eb",
     fontWeight: "bold",
+  },
+
+  buttonRow: {
+    flexDirection: "row",
+    marginTop: 14,
+  },
+
+  editButton: {
+    backgroundColor: "#2563eb",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+
+  addButton: {
+    backgroundColor: "#2563eb",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
   },
 });
