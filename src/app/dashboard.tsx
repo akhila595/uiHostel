@@ -1,6 +1,7 @@
 import { useFocusEffect } from "expo-router";
 import { useCallback } from "react";
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -67,7 +68,23 @@ export default function DashboardScreen() {
       loadData();
     }, []),
   );
+  const handleLogout = () => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          await AsyncStorage.clear();
 
+          router.replace("/login");
+        },
+      },
+    ]);
+  };
   const summaryCards = [
     {
       title: "Students",
@@ -210,6 +227,10 @@ export default function DashboardScreen() {
             </View>
           ))
         )}
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
+
         <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
@@ -355,5 +376,18 @@ const styles = StyleSheet.create({
 
   emptyText: {
     color: "#6b7280",
+  },
+  logoutButton: {
+    marginTop: 15,
+    backgroundColor: "#dc2626",
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 10,
+    alignSelf: "flex-start",
+  },
+
+  logoutText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
